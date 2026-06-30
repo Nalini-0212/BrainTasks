@@ -1,1 +1,150 @@
 # Brain Cluster Setup
+
+# 🚀 Brain Tasks Application – CI/CD Deployment on AWS EKS
+
+---
+
+## 📌 Project Overview
+
+This project demonstrates an end-to-end CI/CD pipeline to deploy a containerized application into **Amazon EKS (Kubernetes)** using:
+
+- AWS CodePipeline
+- AWS CodeBuild
+- DockerHub
+- Amazon EKS
+- CloudWatch Logs & Container Insights
+
+---
+
+## 🏗️ Architecture
+GitHub → CodePipeline → CodeBuild (Build & Push)
+→ CodeBuild (Deploy) → Amazon EKS → LoadBalancer → Application
+
+Brain-Tasks/
+│
+├── app/                         # Application + Docker
+│   ├── Dockerfile
+│   ├── dist/                   # React build files
+│
+├── cicd/                       # CI/CD pipeline config
+│   ├── buildspec.yml
+│   ├── buildspec-deploy.yml
+│
+├── k8s/                        # Kubernetes manifests
+│   ├── deployment.yaml
+│   ├── service.yaml
+│
+├── screenshots/                # Proof (important for evaluation)
+│   ├── pipeline.png
+│   ├── pods.png
+│   ├── cloudwatch.png
+│   ├── app-url.png
+│
+├── docs/ (optional)            # Your Word/PDF explanation
+│   └── Application-Deployment.docx
+│
+└── README.md
+
+---
+
+## 🐳 Docker Setup
+
+### Dockerfile
+
+```dockerfile
+FROM httpd:2.4-alpine
+RUN rm -rf /usr/local/apache2/htdocs/*
+COPY dist/ /usr/local/apache2/htdocs/
+EXPOSE 80
+CMD ["httpd-foreground"]
+
+👉 Serves the application using Apache on port 80
+
+
+⚙️ CI/CD Pipeline Explanation
+✅ Stage 1: Source
+
+Code is pulled from GitHub repository
+
+
+✅ Stage 2: Build (CodeBuild)
+
+Builds Docker image from app/ folder
+Tags image dynamically:
+
+V1.<CODEBUILD_BUILD_NUMBER>
+
+
+Pushes image to DockerHub
+Generates:
+
+versions.txt
+image.txt
+
+
+✅ Stage 3: Deploy (CodeBuild)
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+kubectl set image deployment/brain-deployment \ brain-container=$IMAGE_URL
+kubectl rollout status deployment/brain-deployment
+
+👉 Ensures zero-downtime rolling updates
+
+☸️ Kubernetes Deployment
+✅ Deployment
+
+3 replicas
+Rolling updates enabled
+
+✅ Service
+
+Type: LoadBalancer
+Port mapping:
+
+3000 → 80
+
+Application URL
+
+http://a29be4fcfee3948b2a72c6225da8f3e9-811224438.us-east-1.elb.amazonaws.com:3000/
+
+🔑 Kubernetes Cluster ARN
+arn:aws:eks:us-east-1:767397831600:cluster/brain-cluster
+
+📊 Monitoring (CloudWatch)
+✅ Build Logs
+/aws/codebuild/brain-tasks
+
+✅ Deploy Logs
+/aws/codebuild/eks-deploy-brain-tasks
+
+✅ Application Logs
+/aws/containerinsights/brain-cluster/application
+
+👉 Logs collected using:
+
+Fluent Bit
+CloudWatch Agent
+
+
+📊 Container Insights
+
+
+aws eks create-addon \
+  --cluster-name brain-cluster \
+  --addon-name amazon-cloudwatch-observability \
+  --region us-east-1
+
+✅ Verification Commands
+
+
+kubectl get pods
+kubectl get svc
+kubectl logs -l app=brain
+
+Screenshots
+
+
+
+
+
+
