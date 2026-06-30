@@ -141,7 +141,55 @@ kubectl get pods
 kubectl get svc
 kubectl logs -l app=brain
 
-Screenshots
+# 📸 Screenshots
+
+---
+
+### ✅ 1. CodePipeline Success
+
+ ![Pipeline Success](screenshots/pipeline.png)
+
+👉 Shows all stages completed successfully (Source, Build, Deploy)
+
+✅ 2. Kubernetes Pods Running
+screenshots/pods.png
+
+Output of:
+kubectl get pods
+
+✅ 3. CloudWatch Logs
+screenshots/cloudwatch.png
+👉 Shows application logs from:
+/aws/containerinsights/brain-cluster/application
+
+✅ 4. Application Output
+screenshots/app-url.png
+👉 Application accessed via LoadBalancer
+
+✅ Key Features
+
+✅ End-to-end CI/CD pipeline
+✅ Dockerized application
+✅ Kubernetes deployment on AWS EKS
+✅ Dynamic image versioning
+✅ CloudWatch monitoring enabled
+✅ Container Insights enabled
+
+🛠️ Author & Community
+This project is maintained by Nalini Selvaraj 💡. Your feedback and contributions are welcome!
+
+📧 Connect with me:
+
+GitHub: @Nalini-0212
+
+
+
+
+
+
+
+
+
 
 
 
