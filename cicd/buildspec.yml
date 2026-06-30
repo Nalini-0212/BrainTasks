@@ -1,0 +1,43 @@
+version: 0.2
+env:
+  variables:
+    IMAGE_REPOSITORY_NAME: "naliniselv/braintask"
+  secrets-manager:
+    DOCKERHUB_USERNAME: "dockerhubcred:username"
+    DOCKERHUB_PASSWORD: "dockerhubcred:password"
+
+phases:
+  pre_build:
+    commands:
+      - "echo Logging in to DockerHub..."
+      - "echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin"
+      - "export VERSION=V1.$CODEBUILD_BUILD_NUMBER"
+      - "export IMAGE_URL=$IMAGE_REPOSITORY_NAME:$VERSION"
+      - "echo Image_URL: '$IMAGE_URL'"
+      - "echo Build_Version: '$VERSION'"
+  build:
+    commands:
+      - "echo Building the Docker image....."
+      - "docker build -t $IMAGE_REPOSITORY_NAME:$VERSION -f app/Dockerfile ./app"
+      - "echo Tagging the Docker image....."
+      - "docker tag $IMAGE_REPOSITORY_NAME:$VERSION $IMAGE_REPOSITORY_NAME:latest"
+  
+  post_build:
+    commands:
+      - "echo Pushing the docker images with versions...."
+      - "docker push $IMAGE_URL"
+      - "echo Pushing the docker image with latest tag"
+      - "docker push $IMAGE_REPOSITORY_NAME:latest"
+      - "echo saving the version information to file"
+      - "echo $VERSION > versions.txt"
+      - "echo $IMAGE_URL > image.txt"
+    
+
+  
+artifacts:
+  files:
+    - 'versions.txt'
+    - 'image.txt'
+    - 'deployment.yaml'
+    - 'service.yaml'
+    - 'buildspec-deploy.yml'

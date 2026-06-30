@@ -1,0 +1,15 @@
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Ignore log files
+*.log
+
+# Ignore temporary files created by editors
+*~
+*.swp
+*.swo
+*.swn
+*.bak

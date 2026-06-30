@@ -1,0 +1,62 @@
+version: 0.2
+env:
+  variables:
+    CLUSTER_NAME: 'brain-cluster'
+    AWS_DEFAULT_REGION: 'us-east-1'
+phases:
+  install:
+    commands:
+      - "set -e"
+      - "echo Installing kubectl...."
+      - "curl -LO https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      - "curl -LO https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+      - "echo $(cat kubectl.sha256)  kubectl | sha256sum --check"
+      - "chmod +x kubectl"
+      - "mkdir -p ~/.local/bin"
+      - "mv ./kubectl ~/.local/bin/kubectl"
+      - "export PATH=$PATH:/root/.local/bin"
+  pre_build:
+    commands:
+      - "echo Cluster Name: '$CLUSTER_NAME'"
+      - "echo Region: '$AWS_DEFAULT_REGION'"
+      - "aws sts get-caller-identity"
+      - "aws eks list-clusters --region $AWS_DEFAULT_REGION"
+      - "echo checking contents"
+      - "ls -ltr"
+      - "echo Loading version info..."
+      - "export VERSION=$(cat versions.txt)"
+      - "export IMAGE_URL=$(cat image.txt)"
+      - "echo Deploying Version: '$VERSION'"
+      - "echo Image URL: '$IMAGE_URL'"
+      - "echo Updating kubeconfig for the cluster ...."
+      - "aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $CLUSTER_NAME"
+      - "echo checking the nodes in the cluster......"
+      - "kubectl get nodes"
+
+  build:
+    commands:
+      - "echo Applying manifests files to the cluster....."
+      - "kubectl apply -f k8s/deployment.yaml"
+      - "kubectl apply -f k8s/service.yaml"
+      - "echo Updating image dynamically..."
+      - "kubectl set image deployment/brain-deployment brain-container=$IMAGE_URL"
+
+  post_build:
+    commands:
+      - "echo Checking the deployments in the cluster....."
+      - "kubectl get deployments"
+      - "echo Checking deployed image..."
+      - "kubectl describe deployment brain-deployment | grep Image"
+      - "echo getting status of pods in the cluster....."
+      - "kubectl get pods"
+      - "echo checking the rollout status of the deployment....."
+      - "kubectl rollout status deployment/brain-deployment"
+      - "echo Waiting additional 20 seconds for stability..."
+      - "sleep 20"
+      - "echo Final pod status:"
+      - "kubectl get pods -o wide"
+      - "echo getting pod logs"
+      - "kubectl logs -l app=brain"
+      - "echo getting services in the cluster....."
+      - "kubectl get svc brain-service"
+      - "echo Deployment and Service created successfully"
