@@ -104,8 +104,7 @@ Add these two policy to Role_name mentioned above
 
 ## EKS Node Group Role
 
-Allows EC2 worker nodes to run containers
-Communicates with AWS services
+Add EKS Node Role [eksctl-brain-cluster-nodegroup-bra-NodeInstanceRole-aYxeLgsJ1mrR] to CloudWatchAgentServerPolicy to monitor cluster 
 
 
 ## Kubernetes Access Role (aws-auth)
