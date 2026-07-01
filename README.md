@@ -421,6 +421,8 @@ cicd/buildspec.yml
 ```
 Sample File:
 
+```
+
 version: 0.2
 env:
   variables:
@@ -464,6 +466,7 @@ artifacts:
     - 'k8s/deployment.yaml'
     - 'k8s/service.yaml'
     - 'cicd/buildspec-deploy.yml'
+```
 
 
 Deploy specification file:
@@ -473,6 +476,7 @@ cicd/buildspec-deploy.yml
 ```
 Sample File:
 
+```
 version: 0.2
 env:
   variables:
@@ -535,6 +539,9 @@ phases:
       - "echo getting services in the cluster....."
       - "kubectl get svc brain-service"
       - "echo Deployment and Service created successfully"
+
+```
+
 ---
 
 ## Monitoring
